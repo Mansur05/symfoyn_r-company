@@ -2,6 +2,89 @@
 
 {% block title %}Work Hours{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        .icon {
+            font-size: 13px!important;
+        }
+
+        .icon-red {
+            color: red;
+        }
+
+        .icon-green {
+            color: green;
+            animation: blink 3.0s linear infinite;
+        }
+
+        .icon-gray {
+            color: gray;
+        }
+
+        @keyframes blink {
+            0% { text-shadow: 0 0 15px limegreen; }
+            50% { text-shadow: 0 0 5px limegreen; }
+            100% { text-shadow: 0 0 15px limegreen; }
+        }
+
+        @-webkit-keyframes blink {
+            0% { text-shadow: 0 0 15px limegreen; }
+            50% { text-shadow: 0 0 5px limegreen; }
+            100% { text-shadow: 0 0 15px limegreen; }
+        }
+    </style>
+{% endblock %}
+
+
 {% block body %}
-<h1>Hello, World!</h1>
+<div class="container" style="margin-top: 20%;">
+    <div class="d-flex align-items-center justify-content-center flex-column">
+        <h1>Hello!</h1>
+        <div class="d-flex align-items-baseline">
+            <i class="fas fa-circle icon icon-gray" id="icon"></i>
+            <span class="text-white ml-4" id="info">Получение данных...</span>
+        </div>
+    </div>
+    <div id="getting-started"></div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        $(document).ready(() => {
+            $.ajax({
+                url: '/watch',
+                type: "post",
+                data: {
+                    'marketName': 'nasdaq'
+                } ,
+                success: function (response) {
+                    let currentDate = new Date();
+                    let date = new Date(response.time * 1000 - 10)
+                    currentDate.setHours(date.getHours());
+                    currentDate.setMinutes(date.getMinutes());
+                    currentDate.setSeconds(date.getSeconds());
+
+                    if (response.status) {
+                        $("#icon").removeClass('icon-gray');
+                        $("#icon").removeClass('icon-red');
+                        $("#icon").addClass('icon-green');
+                        $("#info").html('Торги на NYSE, NASDAQ закроются через: <span id="countdown"></span> по МСК')
+                    } else {
+                        $("#icon").removeClass('icon-gray');
+                        $("#icon").removeClass('icon-green');
+                        $("#icon").addClass('icon-red');
+                        $("#info").html('Торги на NYSE, NASDAQ откроются через: <span id="countdown"></span> по МСК')
+                    }
+
+                    $('#countdown').countdown(currentDate, function(event) {
+                        $(this).html(event.strftime('%H:%M:%S'));
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        })
+    </script>
 {% endblock %}
